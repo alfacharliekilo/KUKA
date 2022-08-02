@@ -1,0 +1,11 @@
+&ACCESS  RV
+&PARAM EDITMASK = *
+&PARAM TEMPLATE = C:\KRC\Roboter\Template\ExpertVorgabe
+&REL 14
+DEFDAT  myglobalvars PUBLIC
+DECL GLOBAL INT iindex=9
+DECL GLOBAL INT arraysize=12
+DECL GLOBAL CHAR blockarray[12]
+
+
+ENDDAT

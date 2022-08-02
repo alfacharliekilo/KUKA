@@ -1,0 +1,108 @@
+DEF KRTD_RefRun_BrakeTest( )
+;***************************************************
+;Author: 082 117 100 101
+;Release Date: 01/15/2016		
+;Description: KUKA Robotics Training Department - USA
+;							Reference Run and Brake Test
+;							KR16 Mobile Cell - Modular Cell
+;Revision Level: 1.1
+;***************************************************
+;FOLD --> Change Log
+;ENDFOLD (Change Log)
+;FOLD --> Variables
+DECL INT li_KRTD_DLG_Answer
+;ENDFOLD (Variables)
+;FOLD INI;%{PE}
+  ;FOLD BASISTECH INI
+    GLOBAL INTERRUPT DECL 3 WHEN $STOPMESS==TRUE DO IR_STOPM ( )
+    INTERRUPT ON 3 
+    BAS (#INITMOV,0 )
+  ;ENDFOLD (BASISTECH INI)
+;FOLD SPOTTECH INI
+USERSPOT(#INIT)
+;ENDFOLD (SPOTTECH INI)
+;FOLD GRIPPERTECH INI
+USER_GRP(0,DUMMY,DUMMY,GDEFAULT)
+;ENDFOLD (GRIPPERTECH INI)
+  ;FOLD USER INI
+    ;Make your modifications here
+
+  ;ENDFOLD (USER INI)
+;ENDFOLD (INI)
+
+MsgNotify("KRTD Package - V1.3")
+
+li_KRTD_DLG_Answer = 0
+
+$OV_PRO = 30
+PTP $POS_ACT
+
+IF NOT ($IN_HOME) THEN
+  MsgDialog(li_KRTD_DLG_Answer,"Robot is not at the Home position, move home? - You must verify path is clear!","KRTD_RefRun_BrakeTest",,,,,,,"No","Yes",,1,)
+
+  SWITCH li_KRTD_DLG_Answer
+  
+    CASE 1 ;Yes
+      PTP XHOME
+  
+    CASE 2 ;No
+      MsgQuit("Robot must be at the Home postition, program will abort!")
+      RETURN
+  
+    DEFAULT
+      WAIT FOR FALSE
+    
+  ENDSWITCH
+ENDIF
+
+MsgDialog(li_KRTD_DLG_Answer,"Is the gripper open?","KRTD_RefRun_BrakeTest",,,,,,,"No","Yes",,2,)
+
+SWITCH li_KRTD_DLG_Answer
+
+  CASE 1 ;Yes
+    KRTD_Set_Gripper(#CLOSED)
+    KRTD_Set_Gripper(#OPENED)
+
+  CASE 2 ;No
+    MsgQuit("Gripper is not open, program will abort!")
+    RETURN
+
+  DEFAULT
+    WAIT FOR FALSE
+  
+ENDSWITCH
+
+;FOLD PTP HOME  Vel= 100 % DEFAULT;%{PE}%MKUKATPBASIS,%CMOVE,%VPTP,%P 1:PTP, 2:HOME, 3:, 5:100, 7:DEFAULT
+$BWDSTART = FALSE
+PDAT_ACT=PDEFAULT
+FDAT_ACT=FHOME
+BAS (#PTP_PARAMS,100 )
+$H_POS=XHOME
+PTP  XHOME
+;ENDFOLD
+
+MasRef_Main()
+
+;FOLD PTP HOME  Vel= 100 % DEFAULT;%{PE}%MKUKATPBASIS,%CMOVE,%VPTP,%P 1:PTP, 2:HOME, 3:, 5:100, 7:DEFAULT
+$BWDSTART = FALSE
+PDAT_ACT=PDEFAULT
+FDAT_ACT=FHOME
+BAS (#PTP_PARAMS,100 )
+$H_POS=XHOME
+PTP  XHOME
+;ENDFOLD
+
+BrakeTestReq()
+
+;FOLD PTP HOME  Vel= 100 % DEFAULT;%{PE}%MKUKATPBASIS,%CMOVE,%VPTP,%P 1:PTP, 2:HOME, 3:, 5:100, 7:DEFAULT
+$BWDSTART = FALSE
+PDAT_ACT=PDEFAULT
+FDAT_ACT=FHOME
+BAS (#PTP_PARAMS,100 )
+$H_POS=XHOME
+PTP  XHOME
+;ENDFOLD
+
+KRTD_Verify_Act_Code()
+
+END

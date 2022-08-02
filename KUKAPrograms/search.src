@@ -1,0 +1,116 @@
+&ACCESS RVP
+&REL 7
+&PARAM DISKPATH = KRC:\R1\Program
+DEF  search ( )
+   ;FOLD INI;%{PE}
+      ;FOLD BASISTECH INI
+         GLOBAL INTERRUPT DECL 3 WHEN $STOPMESS==TRUE DO IR_STOPM ( )
+         INTERRUPT ON 3 
+         BAS (#INITMOV,0 )
+      ;ENDFOLD (BASISTECH INI)
+      ;FOLD USER INI
+         ;Make your modifications here
+         
+      ;ENDFOLD (USER INI)
+   ;ENDFOLD (INI)
+
+;reset counter for program reset
+ccount = 0
+
+;define interrupt
+   interrupt decl 99 when $in[27]==true do foundcube()
+   
+   ;FOLD PTP HOME  Vel= 100 % DEFAULT;%{PE}%MKUKATPBASIS,%CMOVE,%VPTP,%P 1:PTP, 2:HOME, 3:, 5:100, 7:DEFAULT
+      $BWDSTART = FALSE
+      PDAT_ACT=PDEFAULT
+      FDAT_ACT=FHOME
+      BAS (#PTP_PARAMS,100 )
+      $H_POS=XHOME
+      PTP  XHOME
+   ;ENDFOLD
+ interrupt on 99  
+   wait sec 0
+   eyeson()
+   
+;FOLD PTP startscan Vel=100 % PDAT1 Tool[15]:DEMO_GRIPPER Base[1]:bluetable;%{PE}%R 8.3.34,%MKUKATPBASIS,%CMOVE,%VPTP,%P 1:PTP, 2:startscan, 3:, 5:100, 7:PDAT1
+$BWDSTART=FALSE
+PDAT_ACT=PPDAT1
+FDAT_ACT=Fstartscan
+BAS(#PTP_PARAMS,100)
+PTP Xstartscan 
+;ENDFOLD
+   
+   
+;FOLD LIN endscan CONT Vel=1 m/s CPDAT1 Tool[15]:DEMO_GRIPPER Base[1]:bluetable;%{PE}%R 8.3.34,%MKUKATPBASIS,%CMOVE,%VLIN,%P 1:LIN, 2:endscan, 3:C_DIS C_DIS, 5:1, 7:CPDAT1
+$BWDSTART=FALSE
+LDAT_ACT=LCPDAT1
+FDAT_ACT=Fendscan
+BAS(#CP_PARAMS,1)
+LIN Xendscan C_DIS C_DIS
+;ENDFOLD
+   wait sec 0
+   eyesoff()
+   interrupt off 99
+   
+   ;move back to scan position
+   $APO.cdis = 300
+   ptp xstartscan c_dis
+   
+   ;move to scanned positions
+   for ccount = 1 to 3
+      ptp cubepos[1,ccount]
+      wait sec 0.2
+   endfor
+
+   ;FOLD PTP HOME  Vel= 100 % DEFAULT;%{PE}%MKUKATPBASIS,%CMOVE,%VPTP,%P 1:PTP, 2:HOME, 3:, 5:100, 7:DEFAULT
+      $BWDSTART = FALSE
+      PDAT_ACT=PDEFAULT
+      FDAT_ACT=FHOME
+      BAS (#PTP_PARAMS,100 )
+      $H_POS=XHOME
+      PTP  XHOME
+   ;ENDFOLD
+END
+
+def eyeson()
+   $out[27] = true
+end
+
+def eyesoff()
+   $out[27] = false
+end
+
+def foundcube()
+decl KRLMSG_T mymessage
+decl KRLMSGPAR_T params[3]
+decl KRLMSGOPT_T opts
+decl int hh
+decl EKRLMSGTYPE headsup
+
+   interrupt off
+
+;iterate counter
+ccount = ccount + 1
+
+;display current pos x,y,z
+
+;fold Message: Cube detected at position X,Y,Z
+   headsup = #notify
+   mymessage={modul[] "College", Nr 1999, msg_txt[] "Cube detected! X: %1 Y: %2 Z: %3"}
+   opts = {VL_STOP true, CLEAR_P_RESET true, clear_p_saw false, log_to_db true}
+   ;params / placeholder
+   params[1] = {par_type #value}
+   params[1].par_int = $POS_INT.x
+   params[2] = {par_type #value}
+   params[2].par_int = $POS_INT.y
+   params[3] = {par_type #value}
+   params[3].par_int = $POS_INT.z
+   
+   cubepos[1,ccount] = $pos_int
+   ;generate message
+   hh = set_krlmsg(headsup, mymessage, params[], opts)
+;endfold
+
+   interrupt on 99
+
+end

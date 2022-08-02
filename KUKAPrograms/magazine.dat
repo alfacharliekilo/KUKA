@@ -1,0 +1,9 @@
+&ACCESS RVP
+&REL 12
+&PARAM EDITMASK = *
+&PARAM TEMPLATE = C:\KRC\Roboter\Template\ExpertVorgabe
+DEFDAT  magazine PUBLIC
+
+DECL BASIS_SUGG_T LAST_BASIS={POINT1[] "home                    ",POINT2[] "home                    ",CP_PARAMS[] "CPDAT0                  ",PTP_PARAMS[] "PDAT1                   ",CONT[] "                        ",CP_VEL[] "2.0                     ",PTP_VEL[] "100                     ",SYNC_PARAMS[] "SYNCDAT                 ",SPL_NAME[] "S0                      ",A_PARAMS[] "ADAT0                   "}
+DECL PDAT PPDAT1={VEL 100.000,ACC 100.000,APO_DIST 100.000,GEAR_JERK 50.0000,EXAX_IGN 0}
+ENDDAT

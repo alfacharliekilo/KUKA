@@ -1,0 +1,167 @@
+&ACCESS RVP
+&REL 12
+&PARAM EDITMASK = *
+&PARAM TEMPLATE = C:\KRC\Roboter\Template\ExpertVorgabe
+DEF magazine( )
+decl KRLMSG_T mymessage, myquestion
+decl KRLMSGPAR_T params[3]
+decl KRLMSGOPT_T opts
+decl KRLMSGDLGSK_T Softkey[7]
+decl int hh, hh2, hh3, answer, numblocks, blookup[2,6], keyindex[6]
+decl EKRLMSGTYPE headsup
+decl BOOL eraser, present
+;FOLD INI;%{PE}
+  ;FOLD BASISTECH INI
+    GLOBAL INTERRUPT DECL 3 WHEN $STOPMESS==TRUE DO IR_STOPM ( )
+    INTERRUPT ON 3 
+    BAS (#INITMOV,0 )
+  ;ENDFOLD (BASISTECH INI)
+;FOLD SPOTTECH INI
+USERSPOT(#INIT)
+;ENDFOLD (SPOTTECH INI)
+;FOLD GRIPPERTECH INI
+USER_GRP(0,DUMMY,DUMMY,GDEFAULT)
+;ENDFOLD (GRIPPERTECH INI)
+  ;FOLD USER INI
+    ;Make your modifications here
+
+  ;ENDFOLD (USER INI)
+;ENDFOLD (INI)
+
+
+;FOLD PTP home Vel=100 % PDAT1;%{PE}%R 8.3.34,%MKUKATPBASIS,%CMOVE,%VPTP,%P 1:PTP, 2:home, 3:, 5:100, 7:PDAT1
+$BWDSTART=FALSE
+PDAT_ACT=PPDAT1
+FDAT_ACT=Fhome
+BAS(#PTP_PARAMS,100)
+$H_POS=XHOME
+PTP Xhome 
+;ENDFOLD
+
+
+
+;fold Message: How many blocks to move? (Dialog)
+   myquestion={modul[] "College", Nr 1999, msg_txt[] "Select number of cubes to transport"}
+   opts = {VL_STOP true, CLEAR_P_RESET true, clear_p_saw false, log_to_db true}
+   ;params / placeholder
+   params[1] = {par_type #empty}
+   params[2] = {par_type #empty}
+   params[3] = {par_type #empty}
+   ;softkeys / placeholder
+   Softkey[1]={sk_type #value, sk_txt[] "2"} ; 2 blocks
+   Softkey[2]={sk_type #value, sk_txt[] "3"} ; 3 blocks
+   Softkey[3]={sk_type #value, sk_txt[] "5"} ; 5 blocks
+   Softkey[4]={sk_type #value, sk_txt[] "8"} ; 8 blocks
+   Softkey[5]={sk_type #value, sk_txt[] "12"} ; 12 blocks
+   Softkey[6]={sk_type #value, sk_txt[] "No cubes"} ; No blocks
+   keyindex[1] = 2
+   keyindex[2] = 3
+   keyindex[3] = 5
+   keyindex[4] = 8
+   keyindex[5] = 12
+   keyindex[6] = 0
+   
+   ;generate message
+   hh3 = set_krldlg( myquestion, params[],Softkey[], opts)
+   repeat ;Creates loop until dialog is answered
+   present = EXISTS_KRLDLG(hh3, answer) ; Variable answer is returned
+   until not(present)
+   
+   ;makes a lookup array for numblocks variable
+   ;fold bloopup array
+   for iindex = 1 to 6
+      blookup[1,iindex] = iindex
+      blookup[2,iindex] = keyindex[iindex]
+   endfor
+   
+   ;endfold
+   
+   
+   ; Switch case for dialog
+   switch answer
+
+   case 1,2,3,4,5,6
+   numblocks = blookup[2,answer]
+   default
+   return
+   endswitch
+   
+;endfold
+
+initblocks()
+
+;fold Message: Program started (Notification)
+   headsup = #notify
+   mymessage={modul[] "College", Nr 1999, msg_txt[] "Magazine program has started"}
+   opts = {VL_STOP true, CLEAR_P_RESET true, clear_p_saw false, log_to_db true}
+   ;params / placeholder
+   params[1] = {par_type #empty}
+   params[2] = {par_type #empty}
+   params[3] = {par_type #empty}
+   
+   ;generate message
+   hh = set_krlmsg(headsup, mymessage, params[], opts)
+;endfold
+
+;fold Message: Program running (Notification)
+   headsup = #notify
+   mymessage={modul[] "College", Nr 1999, msg_txt[] "Magazine program is running"}
+   opts = {VL_STOP true, CLEAR_P_RESET true, clear_p_saw false, log_to_db true}
+   ;params / placeholder
+   params[1] = {par_type #empty}
+   params[2] = {par_type #empty}
+   params[3] = {par_type #empty}
+   ;generate message
+   hh2 = set_krlmsg(headsup, mymessage, params[], opts)
+;endfold
+
+for iindex = 1 to numblocks
+     fetch_block()
+     wait sec 0
+     blockarray[iindex] = "X"
+     return_block()
+     ;fold Message: Display cube count (Notification)
+         headsup = #notify
+         mymessage={modul[] "College", Nr 1999, msg_txt[] "Cube number %1 has been moved"}
+         opts = {VL_STOP true, CLEAR_P_RESET true, clear_p_saw false, log_to_db true}
+         ;params / placeholder
+         params[1] = {par_type #value}
+         params[1].par_int = iindex
+         params[2] = {par_type #empty}
+         params[3] = {par_type #empty}
+         ;generate message
+         hh = set_krlmsg(headsup, mymessage, params[], opts)
+;endfold
+
+   if iindex == 10 then
+      ;fold Message: Ten cubes counted (Acknowledgement)
+         headsup = #quit
+         mymessage={modul[] "College", Nr 1999, msg_txt[] "%%1 Cubes counted"}
+         opts = {VL_STOP true, CLEAR_P_RESET true, clear_p_saw false, log_to_db true}
+         ;params / placeholder
+         params[1] = {par_type #value}
+         params[1].par_int = iindex
+         params[2] = {par_type #empty}
+         params[3] = {par_type #empty}
+         ;generate message
+         hh = set_krlmsg(headsup, mymessage, params[], opts)
+         repeat
+            present = EXISTS_KRLMSG(hh)
+         until not(present)
+      ;endfold
+   endif
+   
+   if $in[16] then
+      eraser = clear_krlmsg(hh2)
+      exit
+   endif
+   present = EXISTS_KRLMSG(hh2)
+
+endfor
+
+END
+def initblocks()
+for iindex = 1 to 12
+     blockarray[iindex] = "O"
+endfor
+end

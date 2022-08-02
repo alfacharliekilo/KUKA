@@ -1,0 +1,28 @@
+&ACCESS RVP
+&REL 18
+&PARAM EDITMASK = *
+&PARAM TEMPLATE = C:\KRC\Roboter\Template\vorgabe
+DEFDAT mystructure public
+;FOLD EXTERNAL DECLARATIONS;%{PE}%MKUKATPBASIS,%CEXT,%VCOMMON,%P
+;FOLD GRIPPERTECH EXT
+  EXT  H50 (INT:IN, INT:IN ,INT:IN ,GRP_TYP:IN)
+;ENDFOLD (GRIPPERTECH EXT)
+;FOLD SPOTTECH EXT
+  EXT  USERSPOT (S_COMMAND  :IN, SPOT_TYPE:IN)
+;ENDFOLD (SPOTTECH EXT)
+;FOLD BASISTECH EXT;%{PE}%MKUKATPBASIS,%CEXT,%VEXT,%P
+EXT  BAS (BAS_COMMAND  :IN,REAL  :IN )
+DECL INT SUCCESS
+;ENDFOLD (BASISTECH EXT)
+;FOLD USER EXT;%{E}%MKUKATPUSER,%CEXT,%VEXT,%P
+;Make your modifications here
+
+;ENDFOLD (USER EXT)
+;ENDFOLD (EXTERNAL DECLARATIONS)
+
+global enum color_type red, yellow, green, blue
+global struc box_type REAL length, width, height, BOOL painted, INT botnum, COLOR_TYPE boxcolor
+decl global box_type muh_box
+
+decl global color_type lamp
+ENDDAT

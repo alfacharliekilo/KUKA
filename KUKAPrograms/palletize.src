@@ -1,0 +1,196 @@
+&ACCESS RVP
+&REL 11
+&PARAM EDITMASK = *
+&PARAM TEMPLATE = C:\KRC\Roboter\Template\vorgabe
+&PARAM DISKPATH = KRC:\R1\Program
+DEF palletize( )
+decl int xx
+
+;Timers
+resettimes() ;Accomplishes all three, and stops old advancing timers
+;$timer[1]=0 ;palletize
+;$timer[2]=0 ;de-palletize
+;$timer[3]=0 ;total
+;FOLD INI;%{PE}
+  ;FOLD BASISTECH INI
+    GLOBAL INTERRUPT DECL 3 WHEN $STOPMESS==TRUE DO IR_STOPM ( )
+    INTERRUPT ON 3 
+    BAS (#INITMOV,0 )
+  ;ENDFOLD (BASISTECH INI)
+;FOLD SPOTTECH INI
+USERSPOT(#INIT)
+;ENDFOLD (SPOTTECH INI)
+;FOLD GRIPPERTECH INI
+USER_GRP(0,DUMMY,DUMMY,GDEFAULT)
+;ENDFOLD (GRIPPERTECH INI)
+  ;FOLD USER INI
+    ;Make your modifications here
+
+  ;ENDFOLD (USER INI)
+;ENDFOLD (INI)
+
+;FOLD PTP HOME  Vel= 100 % DEFAULT;%{PE}%MKUKATPBASIS,%CMOVE,%VPTP,%P 1:PTP, 2:HOME, 3:, 5:100, 7:DEFAULT
+$BWDSTART = FALSE
+PDAT_ACT=PDEFAULT
+FDAT_ACT=FHOME
+BAS (#PTP_PARAMS,100 )
+$H_POS=XHOME
+PTP  XHOME
+;ENDFOLD
+
+;~~~~~~~~~~~~~~~~~~~Calculate Position~~~~~~~~~~~~~~~~~~~~~~
+
+;fold calculate positions 
+
+for row = 1 to 4
+   for col = 1 to 4
+      setdown[row,col] = xstartpos
+      setdown[row,col].x = setdown[row,col].x + (row-1)*xoff
+      setdown[row,col].y = setdown[row,col].y + (col-1)*yoff
+      sstatus[row,col] = setdown[row,col].s
+      sturn[row,col] = setdown[row,col].t
+
+      prepos[row,col] = setdown[row,col]
+      prepos[row,col].z = prepos[row,col].z + zoff
+      pstatus[row,col] = prepos[row,col].s
+      pturn[row,col] = prepos[row,col].t
+      endfor
+   endfor
+   
+;manipulate status and turn for specific pre-positions
+prepos[3,1].t =27
+prepos[4,1].t =27
+;endfold
+
+;~~~~~~~~~~~~~~~~~~~Palletize~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+;Advance run stop for timer 1
+$timer_stop[1] = false
+$timer_stop[3] = false
+
+;fold palletize
+$out[16] = true
+for row = 1 to 4
+   for col = 1 to 4
+      fetch_block()
+      
+      ;set ptp velocity
+      for xx = 1 to 6
+         $vel_axis[xx] = 75
+      endfor
+      
+      ;ptp move to prepos
+      $tool = tool_data[15]
+      $load = load_data[15]
+      $base = base_data[1]
+      
+      $APO.cdis = 150
+      ptp prepos[row,col] c_dis
+      
+      ;set the cp velocity 0.3 m/s
+      $VEL.cp = 0.3
+      
+      lin setdown[row,col]
+      
+      opengrip()
+      
+      ;set the cp vel 1 m/s
+      $VEL.cp = 1
+      
+      ;move back to prepos
+      lin prepos[row,col] c_dis
+      endfor
+endfor
+
+wait sec 0
+$out[16]=false
+$timer_stop[1] = true
+$timer[7]=$timer[1]
+
+;endfold
+
+
+;~~~~~~~~~~~~~~~~~~~De-palletize~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+;Advance run stop for timer 1
+$timer_stop[2] = false
+
+;fold depalletize
+
+for row = 1 to 4
+   for col = 1 to 4
+      
+      ;set ptp velocity
+      for xx = 1 to 6
+         $vel_axis[xx] = 75
+      endfor
+      
+      ;ptp move to prepos
+      $tool = tool_data[15]
+      $load = load_data[15]
+      $base = base_data[1]
+      
+      $APO.cdis = 150
+      ptp prepos[row,col] c_dis
+      
+      ;set the cp velocity 0.3 m/s
+      $VEL.cp = 0.3
+      
+      lin setdown[row,col]
+      
+      closegrip()
+      
+      ;set the cp vel 1 m/s
+      $VEL.cp = 1
+      
+      ;move back to prepos
+      lin prepos[row,col] c_dis
+      
+      ;return blocks
+      return_block()
+      
+      endfor
+endfor
+
+;endfold
+
+
+;FOLD PTP HOME  Vel= 100 % DEFAULT;%{PE}%MKUKATPBASIS,%CMOVE,%VPTP,%P 1:PTP, 2:HOME, 3:, 5:100, 7:DEFAULT
+$BWDSTART = FALSE
+PDAT_ACT=PDEFAULT
+FDAT_ACT=FHOME
+BAS (#PTP_PARAMS,100 )
+$H_POS=XHOME
+PTP  XHOME
+;ENDFOLD
+
+wait sec 0
+$timer_stop[2] = true
+$timer_stop[3] = true
+$timer[8]=$timer[2]
+$timer[9]=$timer[3]
+
+END
+
+def opengrip()
+$out[25] = true
+$out[26] = false
+$out[14] = true
+wait sec 0.25
+
+end
+
+def closegrip()
+$out[25] = false
+$out[26] = true
+$out[14] = false
+wait sec 0.25
+end
+
+def resettimes()
+for ii = 1 to 3
+   $timer_stop[ii]=true
+   $timer[ii] = 0
+endfor
+end
+
