@@ -1,0 +1,96 @@
+﻿TYPE "UDT SFTPLCOutputs"
+VERSION : 0.1
+   STRUCT
+      "Tray Chamber Interlock.XTIO[1].I1I2" : Bool;
+      Element_1 : Bool;   // Not Used
+      "Robot Cell Interlock.XTIO[1].I3I4" : Bool;
+      Element_2 : Bool;   // Not Used
+      "EMD_EStop_Robot.XTIO[1].I5" : Bool;
+      Element_3 : Bool;   // Not Used
+      "EMD_SAFF_Robot.XTIO[1].I7" : Bool;
+      Element_4 : Bool;   // Not Used
+      "E-Stop_ ES21.XTIO[2].I1I2" : Bool;
+      Element_5 : Bool;   // Not Used
+      "ISOPressPanelInterlock.XTIO[2].I3I4" : Bool;
+      Element_6 : Bool;   // Not Used
+      "Request to Load Trays.XTIO[2].I5" : Bool;
+      "Request to Enter Cell.XTIO[2].I6" : Bool;
+      "Unlock ISO Panel.XTIO[2].I7" : Bool;
+      "Reset.XTIO[2].I8" : Bool;
+      "Airlock:OPEN.XTIO[3].I1" : Bool;
+      "Airlock:CLOSED.XTIO[3].I2" : Bool;
+      Element_7 : Bool;   // Not Used
+      Element_8 : Bool;   // Not Used
+      EDM_EMG_KOZ : Bool;   // Not Used
+      EDM_ISO_KOZ : Bool;   // Not Used
+      EDM_TLCH_KOZ : Bool;   // Not Used
+      EDM_ALU_KOZ : Bool;   // Not Used
+      iModule4 : Byte;   // Safety PLC Input
+      iModule5 : Byte;   // Safety PLC Input
+      iModule6 : Byte;   // Safety PLC Input
+      iModule7 : Byte;   // Safety PLC Input
+      iModule8 : Byte;   // Safety PLC Input
+      iModule9 : Byte;   // Safety PLC Input
+      iModule10 : Byte;   // Safety PLC Input
+      iModule11 : Byte;   // Safety PLC Input
+      iModule12 : Byte;   // Safety PLC Input
+      "Lamp:CellIsGo.XTIO[1].Q1" : Bool;
+      "Lamp:CellIsStopped.XTIO[1].Q2" : Bool;
+      "TrayChamberSolenoid.XTIO[1].Q3" : Bool;
+      "RobotCellSolenoid.XTIO[1].Q4" : Bool;
+      Element_13 : Bool;
+      Element_14 : Bool;
+      Element_15 : Bool;
+      Element_16 : Bool;
+      "Lamp:ResetCell.XTIO[2].Q1" : Bool;
+      "ISOPressPanelSolenoid.XTIO[2].Q2" : Bool;
+      "EStop_KF300.XTIO[2].Q3" : Bool;
+      "SAFF_KF300.XTIO[2].Q4" : Bool;
+      Element_17 : Bool;
+      Element_18 : Bool;
+      Element_19 : Bool;
+      Element_20 : Bool;
+      "Lamp:CloseTraySolenoid.XTIO[3].Q1" : Bool;
+      "Lamp:CloseRobotSolenoid.XTIO[3].Q2" : Bool;
+      "Lamp:CloseISOSolenoid.XTIO[3].Q3" : Bool;
+      Element_21 : Bool;
+      Element_22 : Bool;
+      Element_23 : Bool;
+      Element_24 : Bool;
+      Element_25 : Bool;
+      qModule4 : Byte;   // Safety PLC Output
+      qModule5 : Byte;   // Safety PLC Output
+      qModule6 : Byte;   // Safety PLC Output
+      qModule7 : Byte;   // Safety PLC Output
+      qModule8 : Byte;   // Safety PLC Output
+      qModule9 : Byte;   // Safety PLC Output
+      qModule10 : Byte;   // Safety PLC Output
+      qModule11 : Byte;   // Safety PLC Output
+      qModule12 : Byte;   // Safety PLC Output
+      "EStop OK" : Bool;
+      "System EStopped" : Bool;
+      "SAFF is OK" : Bool;
+      "System is Safeguarded" : Bool;
+      "Result 0.4" : Bool;
+      "Result 0.5" : Bool;
+      "Result 0.6" : Bool;
+      "Result 0.7" : Bool;
+      LogicResult1 : Byte;   // PLC Logical Result
+      LogicResult2 : Byte;   // PLC Logical Result
+      LogicResult3 : Byte;   // PLC Logical Result
+      ActivateSpeedMon : Bool;
+      Element_26 : Bool;
+      Element_27 : Bool;
+      Element_28 : Bool;
+      Element_29 : Bool;
+      Element_30 : Bool;
+      Element_31 : Bool;
+      Element_32 : Bool;
+      DirectOut0 : Byte;   // PLC Direct Output
+      DirectOut1 : Byte;   // PLC Direct Output
+      DirectOut2 : Byte;   // PLC Direct Output
+      DirectOut3 : Byte;   // PLC Direct Output
+   END_STRUCT;
+
+END_TYPE
+
